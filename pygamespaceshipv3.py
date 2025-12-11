@@ -2,31 +2,23 @@ import pygame
 import random
 import os
 
-# =========================
-# CONFIG
-# =========================
 WIDTH = 600
 HEIGHT = 700
 PLAYER_SPEED = 8
 ENEMY_SPEED = 4
 BULLET_SPEED = 10
-SPAWN_RATE = 1500  # milliseconds
+SPAWN_RATE = 1500
 TOTAL_LIVES = 3
 FPS = 165
 
 HIGHSCORE_FILE = "highscore.txt"
 
-# Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 YELLOW = (255, 215, 0)
 RED = (255, 0, 0)
 CYAN = (0, 206, 209)
 
-
-# =========================
-# LOAD / SAVE HIGH SCORE
-# =========================
 def load_highscore():
     if not os.path.exists(HIGHSCORE_FILE):
         return 0
@@ -37,10 +29,6 @@ def save_highscore(score):
     with open(HIGHSCORE_FILE, "w") as f:
         f.write(str(score))
 
-
-# =========================
-# SPACESHIP CLASS
-# =========================
 class Spaceship:
     def __init__(self, x, y):
         self.x = x
@@ -95,17 +83,12 @@ class Spaceship:
         self.x += dx
         self.x = max(self.width // 2, min(WIDTH - self.width // 2, self.x))
 
-
-# =========================
-# ASTEROID CLASS
-# =========================
 class Asteroid:
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.pixel_size = 3
         
-        # Asteroid design
         self.design = [
             [0,0,0,2,2,3,3,2,0,0,0],
             [0,0,2,2,3,3,3,2,1,0,0],
@@ -148,10 +131,6 @@ class Asteroid:
     def move(self):
         self.y += ENEMY_SPEED
 
-
-# =========================
-# BULLET CLASS
-# =========================
 class Bullet:
     def __init__(self, x, y):
         self.x = x
@@ -169,10 +148,6 @@ class Bullet:
     def get_rect(self):
         return pygame.Rect(self.x - self.width // 2, self.y, self.width, self.height)
 
-
-# =========================
-# GAME CLASS
-# =========================
 class ShootingGame:
     def __init__(self):
         pygame.init()
@@ -182,24 +157,23 @@ class ShootingGame:
         self.font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 28)
         
-        # Confine cursor to window
         pygame.event.set_grab(True)
         
-        # Game objects
+       
         self.player = Spaceship(WIDTH // 2, HEIGHT - 60)
         self.bullets = []
         self.enemies = []
         
-        # Game state
+        
         self.score = 0
         self.lives = TOTAL_LIVES
         self.highscore = load_highscore()
         self.game_over = False
         
-        # Timing
+        
         self.last_spawn = pygame.time.get_ticks()
         
-        # Create star background
+        
         self.stars = []
         for _ in range(120):
             x = random.randint(0, WIDTH)
@@ -215,14 +189,14 @@ class ShootingGame:
                 if event.key == pygame.K_SPACE and not self.game_over:
                     self.shoot()
                 
-                # Add ESC key handling
+              
                 if event.key == pygame.K_ESCAPE:
                     return False
             
             if event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
                 self.shoot()
         
-        # Continuous movement
+     
         if not self.game_over:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:
@@ -230,10 +204,10 @@ class ShootingGame:
             if keys[pygame.K_RIGHT]:
                 self.player.move(PLAYER_SPEED)
             
-            # Mouse movement
+           
             mouse_x, _ = pygame.mouse.get_pos()
             if pygame.mouse.get_focused():
-                # Clamp mouse position to window bounds
+                
                 self.player.x = max(self.player.width // 2, 
                                    min(WIDTH - self.player.width // 2, mouse_x))
         
@@ -255,26 +229,26 @@ class ShootingGame:
         if self.game_over:
             return
         
-        # Spawn enemies
+  
         self.spawn_enemy()
         
-        # Update bullets
+      
         for bullet in self.bullets[:]:
             bullet.move()
             if bullet.y < 0:
                 self.bullets.remove(bullet)
         
-        # Update enemies
+     
         for enemy in self.enemies[:]:
             enemy.move()
             
-            # Check if enemy passed player
+       
             if enemy.y > self.player.y:
                 self.enemies.remove(enemy)
                 self.lose_life()
                 continue
             
-            # Check collision with bullets
+    
             enemy_rect = enemy.get_rect()
             for bullet in self.bullets[:]:
                 bullet_rect = bullet.get_rect()
@@ -296,14 +270,14 @@ class ShootingGame:
             self.game_over = True
     
     def draw(self):
-        # Background
+      
         self.screen.fill(BLACK)
         
-        # Draw stars
+       
         for star in self.stars:
             pygame.draw.circle(self.screen, WHITE, star, 1)
         
-        # Draw game objects
+
         if not self.game_over:
             self.player.draw(self.screen)
             
@@ -313,7 +287,7 @@ class ShootingGame:
             for enemy in self.enemies:
                 enemy.draw(self.screen)
         
-        # Draw UI
+  
         score_text = self.small_font.render(f"Score: {self.score}", True, WHITE)
         self.screen.blit(score_text, (10, 10))
         
@@ -324,7 +298,7 @@ class ShootingGame:
         lives_rect = lives_text.get_rect(topright=(WIDTH - 10, 10))
         self.screen.blit(lives_text, lives_rect)
         
-        # Game over screen
+ 
         if self.game_over:
             game_over_text = self.font.render("GAME OVER", True, RED)
             game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
@@ -347,9 +321,6 @@ class ShootingGame:
         pygame.quit()
 
 
-# =========================
-# RUN THE GAME
-# =========================
 if __name__ == "__main__":
     game = ShootingGame()
     game.run()
